@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Just Dance Wuaze</title>
+    <link rel="icon" type="image/png" href="drawables/jdw_icrounded.png">
+    
+    <style>
+        /* Loading Custom Fonts */
+        @font-face { font-family: 'JDRFont'; src: url('drawables/jdr.ttf') format('truetype'); }
+        @font-face { font-family: 'JDBFont'; src: url('drawables/jdb.ttf') format('truetype'); }
+
+        body, html {
+            margin: 0; padding: 0; 
+            min-height: 100vh;
+            width: 100%;
+            overflow-x: hidden;
+            font-family: 'JDRFont', sans-serif;
+            -webkit-user-select: none;
+            user-select: none;
+            scroll-behavior: smooth;
+        }
+
+        #bg-video {
+            position: fixed; 
+            top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+
+        .top-bar {
+            position: fixed; top: 0; left: 0; width: 100%; height: 80px; 
+            background-color: white; box-shadow: 0px 3px 15px rgba(0,0,0,0.1);
+            z-index: 100;
+            display: flex; justify-content: center; align-items: center;     
+        }
+
+        .header-logo { height: 85%; width: auto; -webkit-user-drag: none; }
+
+        .section-main {
+            position: relative;
+            display: flex; justify-content: center; align-items: flex-start; 
+            width: 100%; height: 100vh;
+            padding-top: 120px;
+            box-sizing: border-box;
+            z-index: 1;
+        }
+
+        .box-wrapper { display: flex; flex-direction: column; align-items: center; text-align: center; width: 90%; }
+
+        .box-label-top {
+            font-family: 'JDRFont', sans-serif; color: white; font-size: 52px;
+            font-weight: bold; letter-spacing: 5px; margin-bottom: 20px; 
+            text-transform: uppercase;
+            text-shadow: 0px 0px 15px rgba(255, 255, 255, 0.7), 2px 4px 6px rgba(0, 0, 0, 0.4);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .center-box {
+            background-color: white; width: 340px; height: 380px; 
+            border-radius: 30px; box-shadow: 0px 20px 50px rgba(0,0,0,0.4);
+            display: flex; flex-direction: column; align-items: center;
+            padding: 20px; box-sizing: border-box; border: 4px solid rgba(255, 255, 255, 0.5);
+        }
+
+        #code-display {
+            width: 90%; height: 55px; 
+            background: linear-gradient(to top right, #FF8C00, #FFA500); 
+            border: none; border-radius: 12px; margin-bottom: 15px; text-align: center;
+            font-family: 'JDBFont', sans-serif; font-size: 32px; letter-spacing: 12px;
+            color: white; outline: none;
+            box-shadow: inset 0px 2px 5px rgba(0,0,0,0.2);
+            caret-color: transparent; /* Hides the blinking cursor */
+        }
+
+        #code-display::placeholder { color: rgba(255,255,255,0.7); letter-spacing: 10px; }
+
+        .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; flex-grow: 1; }
+
+        .num-btn {
+            background: linear-gradient(to top right, #FF8C00, #FFA500); 
+            border: none; border-radius: 15px;
+            font-family: 'JDRFont', sans-serif; font-size: 26px; 
+            cursor: pointer; display: flex; justify-content: center; align-items: center;
+            transition: all 0.1s ease; color: white; box-shadow: 0px 4px 0px #CC7000;
+        }
+
+        .num-btn:active { transform: translateY(2px); box-shadow: 0px 2px 0px #CC7000; }
+
+        .box-label-unleash {
+            font-family: 'JDBFont', sans-serif; color: white; font-size: 36px;
+            font-weight: bold; margin-top: 30px; text-transform: uppercase;
+            text-shadow: 0px 0px 15px rgba(255, 255, 255, 0.6);
+        }
+
+        .box-label-experience {
+            font-family: 'JDRFont', sans-serif; color: white; font-size: 19px;
+            margin-top: 5px; letter-spacing: 1px; max-width: 650px;
+            background: linear-gradient(to right, #fff 20%, #ffd27f 50%, #fff 80%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-size: 200% auto; animation: shine 4s linear infinite;
+        }
+
+        .section-video { width: 100%; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; z-index: 1; padding-top: 50px; padding-bottom: 80px; }
+        .video-container { width: 80%; max-width: 800px; aspect-ratio: 16 / 9; border-radius: 20px; overflow: hidden; box-shadow: 0px 20px 50px rgba(0,0,0,0.5); border: 5px solid white; margin-bottom: 60px; }
+        .glass-card { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 30px; padding: 40px; max-width: 900px; width: 85%; margin-bottom: 50px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); }
+        .long-description { font-family: 'JDRFont', sans-serif; color: white; font-size: 24px; line-height: 1.6; text-align: center; text-shadow: 0px 2px 4px rgba(0,0,0,0.3); }
+        .catalog-container { border-left: 5px solid white; padding-left: 20px; text-align: left; max-width: 900px; width: 85%; }
+        .catalog-headline { font-family: 'JDBFont', sans-serif; color: white; font-size: 42px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; text-shadow: 0px 2px 10px rgba(0, 0, 0, 0.4); }
+        .catalog-subtext { font-family: 'JDRFont', sans-serif; color: white; font-size: 22px; opacity: 0.9; line-height: 1.4; text-shadow: 0px 2px 4px rgba(0,0,0,0.5); }
+
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        @keyframes shine { to { background-position: 200% center; } }
+    </style>
+</head>
+<body>
+
+    <video autoplay muted loop playsinline id="bg-video">
+        <source src="drawables/bg_orange.mp4" type="video/mp4">
+    </video>
+
+    <div class="top-bar">
+        <img src="drawables/jdw_black.png" alt="Logo" class="header-logo" draggable="false">
+    </div>
+
+    <div class="section-main">
+        <div class="box-wrapper">
+            <div class="box-label-top">DANCE ROOM CODE</div>
+            <div class="center-box">
+                <input type="text" id="code-display" maxlength="3" placeholder="_ _ _" autocomplete="off" readonly>
+                <div class="numpad">
+                    <div class="num-btn" onclick="addNum('9')">9</div>
+                    <div class="num-btn" onclick="addNum('8')">8</div>
+                    <div class="num-btn" onclick="addNum('7')">7</div>
+                    <div class="num-btn" onclick="addNum('6')">6</div>
+                    <div class="num-btn" onclick="addNum('5')">5</div>
+                    <div class="num-btn" onclick="addNum('4')">4</div>
+                    <div class="num-btn" onclick="addNum('3')">3</div>
+                    <div class="num-btn" onclick="addNum('2')">2</div>
+                    <div class="num-btn" onclick="addNum('1')">1</div>
+                    <div class="num-btn" onclick="removeNum()">&#10229;</div>
+                    <div class="num-btn" onclick="addNum('0')">0</div>
+                    <div class="num-btn" onclick="submitCode()">&#10003;</div>
+                </div>
+            </div>
+            <div class="box-label-unleash">UNLEASH YOUR INNER DANCER!</div>
+            <div class="box-label-experience">Experience Just Dance's greatest dance routines without a console.</div>
+        </div>
+    </div>
+
+    <div class="section-video">
+        <div class="box-label-top" style="font-size: 32px; margin-bottom: 30px;">INSTANTLY ACCESS THE WORLD OF JUST DANCE.</div>
+        <div class="video-container">
+            <iframe width="100%" height="100%" src="https://www.youtube.com/embed/SQtZPQ4KFtI?autoplay=1&playlist=SQtZPQ4KFtI&loop=1" frameborder="0" allowfullscreen></iframe>
+        </div>
+        <div class="glass-card">
+            <div class="long-description">
+                Play the world's favorite dance video game without a videogame console! <br><br>
+                All it takes to turn any room into a crazy dancefloor is an internet-connected screen and a smartphone to use as a controller! <br><br>
+                Experiencing the fantastic world of Just Dance has never been so easy and fun!
+            </div>
+        </div>
+        <div class="catalog-container">
+            <div class="catalog-headline">Access an ever-growing catalog of more than 500 songs!</div>
+            <div class="catalog-subtext">Whether you prefer today's hottest hits or golden oldies, you'll find something you like in Just Dance Now!</div>
+        </div>
+    </div>
+
+    <script>
+        const display = document.getElementById('code-display');
+
+        // Global Keyboard Listener
+        document.addEventListener('keydown', (e) => {
+            // If the user is on the first section of the page
+            if (window.scrollY < window.innerHeight / 2) {
+                
+                // If the key is a number (0-9)
+                if (e.key >= '0' && e.key <= '9') {
+                    addNum(e.key);
+                } 
+                // If the key is Backspace
+                else if (e.key === 'Backspace') {
+                    removeNum();
+                }
+                // If the key is Enter
+                else if (e.key === 'Enter') {
+                    submitCode();
+                }
+            }
+        });
+
+        function addNum(num) { 
+            if (display.value.length < 3) display.value += num; 
+        }
+
+        function removeNum() { 
+            display.value = display.value.slice(0, -1); 
+        }
+
+        function submitCode() { 
+            if (display.value.length === 3) {
+                console.log("Room Code Submitted: " + display.value);
+                // Trigger your action here
+            } 
+        }
+
+        document.addEventListener('contextmenu', event => event.preventDefault());
+    </script>
+</body>
+</html>
